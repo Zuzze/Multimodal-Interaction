@@ -1,7 +1,7 @@
 import java.util.ArrayList;
  
 ArrayList myShapes;
-abstractSearchObject queryBeingDragged;
+abstractSearchObject ShapeBeingDragged;
 
 
 int dragX;
@@ -10,23 +10,25 @@ color c = color(random(255), random(255), random(255));
  
 void setup()
 {
-  queryBeingDragged = null;
+  ShapeBeingDragged = null;
   myShapes = new ArrayList();
   
   size(800, 500);
   smooth();
   
-  Hit h1 = new Hit("myHit1",c,width/2.0+100,height/5.0+50,100,20);
-  Query q1 =  new Query("myQuery1",color(random(255), random(255), random(255)),width/2.0+100,height/5.0+100,100,20);
-  Query q2 =  new Query("myQuery2",color(random(255), random(255), random(255)),width/2.0,4.0*height/5.0,100,20);
+  Shape q1 =  new Shape("myShape1",color(random(255), random(255), random(255)),width/2.0+100, height/5.0+100, 100, 20);
+  Shape q2 =  new Shape("myShape2",color(random(255), random(255), random(255)),width, 4.0*height/5.0, 100, 20);
+  Shape q3 =  new Shape("myShape2",color(random(255), random(255), random(255)),width, 2.0*height/5.0, 100, 20);
+  Shape q4 =  new Shape("myShape2",color(random(255), random(255), random(255)),width/3, 1.0*height/5.0, 50, 20);
+  Shape q5 =  new Shape("myShape2",color(random(255), random(255), random(255)),width, 4.0*height, 10, 20);
   
-
-// here is where the q1 "connects" to h1
-  q1.hit = h1; 
   
 // note how I am stuffing everything into one array
   myShapes.add(q1 );
   myShapes.add(q2 );
+  myShapes.add(q3 );
+  myShapes.add(q4 );
+  myShapes.add(q5 );
   
 }
 
@@ -40,9 +42,9 @@ void draw()
   
   for(int i = 0; i < myShapes.size(); i++){
 
-// note how I no longer assume it is only query that is being drawn.
-    abstractSearchObject myQuery1 = (abstractSearchObject)myShapes.get(i);
-    myQuery1.display();
+// note how I no longer assume it is only Shape that is being drawn.
+    abstractSearchObject myShape1 = (abstractSearchObject)myShapes.get(i);
+    myShape1.display();
   }
 }
  
@@ -51,34 +53,35 @@ void draw()
 void mousePressed(){
   for(int i = 0; i < myShapes.size(); i++){ 
      // note how I made it generic 
-    abstractSearchObject myQuery1 = (abstractSearchObject)myShapes.get(i);
-    evaluateQuerySelection(myQuery1);
+    abstractSearchObject myShape1 = (abstractSearchObject)myShapes.get(i);
+    evaluateShapeSelection(myShape1);
+     myShape1.qc = color(random(255), random(255), random(255));
   }
   println("pressed");
   
 }
 
 void mouseReleased(){
-  queryBeingDragged = null; 
+  ShapeBeingDragged = null; 
 } 
  
 void mouseDragged(){
-  if( queryBeingDragged != null){
-     println("dragging" + queryBeingDragged.name);
-    //moveQueryByMouse(queryBeingDragged);
+  if( ShapeBeingDragged != null){
+     println("dragging" + ShapeBeingDragged.name);
+    //moveShapeByMouse(ShapeBeingDragged);
     // note how I encapsulated the movement from directly affecting qx and qy
-    queryBeingDragged.moveByMouseCoord(mouseX, mouseY);
+    ShapeBeingDragged.moveByMouseCoord(mouseX, mouseY);
    }
 }  
 
 
 
 
-void evaluateQuerySelection(abstractSearchObject myQuery1){ 
-  if (myQuery1.inQuery(mouseX, mouseY) & queryBeingDragged==null){ 
-    dragX = (int)myQuery1.qx - mouseX;
-    dragY = (int)myQuery1.qy - mouseY;
-    queryBeingDragged = myQuery1;
+void evaluateShapeSelection(abstractSearchObject myShape1){ 
+  if (myShape1.inShape(mouseX, mouseY) & ShapeBeingDragged==null){ 
+    dragX = (int)myShape1.qx - mouseX;
+    dragY = (int)myShape1.qy - mouseY;
+    ShapeBeingDragged = myShape1;
   }
 }
 
@@ -110,7 +113,7 @@ abstract class abstractSearchObject{
     rect(qx,qy,dQx,dQy);
   }
   
-  boolean inQuery(int x, int y){
+  boolean inShape(int x, int y){
     if((x > qx-dQx) & x < (qx+dQx)){
       if((y > qy-dQy)  & y < (qy+dQy)){
         
@@ -128,11 +131,11 @@ abstract class abstractSearchObject{
 
 
 // "extends" is what makes inheritance happen.
-class Query extends abstractSearchObject{
+class Shape extends abstractSearchObject{
   
   Hit hit = null;
   
-  Query(String name, color tempQc, float tempQx, float tempQy,int tempdQx, int tempdQy) {
+  Shape(String name, color tempQc, float tempQx, float tempQy,int tempdQx, int tempdQy) {
 // by convention, you cannot inherit the constructor.
     super( name,  tempQc,  tempQx,  tempQy, tempdQx,  tempdQy);
   }
