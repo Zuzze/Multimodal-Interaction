@@ -3,11 +3,10 @@ import java.util.ArrayList;
 ArrayList shapes;
 abstractSearchObject selectedShape = null;
 abstractSearchObject ShapeBeingDragged;
-
-
 int dragX;
 int dragY;
 color c = color(random(255), random(255), random(255));
+PFont font;
  
 void setup()
 {
@@ -15,6 +14,7 @@ void setup()
   shapes = new ArrayList();
   size(800, 500);//window size
   smooth();
+  font = loadFont("AmericanTypewriter-48.vlw");
   
   //create shapes
   shapes.add(new Shape("Rectangle", color(random(255), random(255), random(255)),width/2.0+100, height/5.0+100, 100, 20));
@@ -30,10 +30,23 @@ void setup()
  
 void draw()
 {
-  background(0);
+  background(255);
   
+  //Text
+  textFont(font, 20);//font style + size)
+  fill(0);//font color
+  text("Mouse position: " + str(mouseX) + ", " + str(mouseY), 50, 50);
+  
+  textFont(font, 20);//font style + size)
+  fill(0);//font color
+  if(selectedShape == null){
+    text("Selected: none", 400, 50);
+  } else {
+    text("Selected: " + selectedShape.type, 400, 50);
+  }
+  
+  //Shapes
   for(int i = 0; i < shapes.size(); i++){
-
 // note how I no longer assume it is only Shape that is being drawn.
     abstractSearchObject myShape1 = (abstractSearchObject)shapes.get(i);
     myShape1.display();
@@ -60,14 +73,27 @@ void mouseDragged(){
     // note how I encapsulated the movement from directly affecting qx and qy
     ShapeBeingDragged.moveByMouseCoord(mouseX, mouseY);
    }
-}  
+}
+
+void keyPressed(){
+  if (key == CODED){
+    if(selectedShape != null){
+       if (keyCode == UP){
+         println("grow " + selectedShape.type);
+       }
+       if(keyCode == DOWN){
+         println("shrink " + selectedShape.type);
+       }
+    }
+  }
+}
 
 
 //=====================================================================
 void evaluateShapeSelection(abstractSearchObject myShape1){ 
   if (myShape1.isOver(mouseX, mouseY) & ShapeBeingDragged==null){
     selectedShape = myShape1;
-    println(myShape1.type);
+    println("Selected: " + myShape1.type);
     dragX = (int)myShape1.qx - mouseX;
     dragY = (int)myShape1.qy - mouseY;
     ShapeBeingDragged = myShape1;
