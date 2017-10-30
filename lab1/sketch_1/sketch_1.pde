@@ -1,11 +1,12 @@
 import java.util.ArrayList;
- 
 ArrayList shapes;
-abstractSearchObject selectedShape = null;
+shapeObject selectedShape = null;
 int dragX;
 int dragY;
-color c = color(random(255), random(255), random(255));
+int Y_AXIS = 1;
+int X_AXIS = 2;
 PFont font;
+
  
 void setup()
 {
@@ -16,19 +17,37 @@ void setup()
   font = loadFont("AmericanTypewriter-48.vlw");
   
   //create shapes
-  shapes.add(new Shape("Rectangle", color(random(255), random(255), random(255)),width/2.0+100, height/5.0+100, 100, 20));
-  shapes.add(new Shape("Triangle", color(random(255), random(255), random(255)),10,10, 100, 20));
-  shapes.add(new Shape("Ellipse", color(random(255), random(255), random(255)),20, 20, 100, 20));
-  shapes.add(new Shape("Circle", color(random(255), random(255), random(255)),50, 50, 50, 20));
-  shapes.add(new Shape("Diamond", color(random(255), random(255), random(255)),width, 4.0*height, 5, 5)); 
+  shapes.add(new Shape("Rectangle", color(0), 600, 300, 25, 25));
+  shapes.add(new Shape("Triangle", color(0), 200, 100, 20, 20));
+  shapes.add(new Shape("Ellipse", color(0), 500, 100, 50, 20));
+  shapes.add(new Shape("Circle", color(0),200, 200, 50, 50));
+  shapes.add(new Shape("Arc", color(0),80, 200, 150, 100)); 
 }
-
- void changeColor(){
-  this.c = color(0,0,255);
+ 
+ void setGradient(int x, int y, float w, float h, color c1, color c2, int axis ) {
+  noFill();
+  if (axis == Y_AXIS) {  // Top to bottom gradient
+    for (int i = y; i <= y+h; i++) {
+      float inter = map(i, y, y+h, 0, 1);
+      color c = lerpColor(c1, c2, inter);
+      stroke(c);
+      line(x, i, x+w, i);
+    }
+  }  
+  else if (axis == X_AXIS) {  // Left to right gradient
+    for (int i = x; i <= x+w; i++) {
+      float inter = map(i, x, x+w, 0, 1);
+      color c = lerpColor(c1, c2, inter);
+      stroke(c);
+      line(i, y, i, y+h);
+    }
   }
+}
  
 void draw(){
+  // Background
   background(255);
+  //setGradient(50, 90, width, height, c1, c2, Y_AXIS);
   
   //Text
   textFont(font, 20);//font style + size)
@@ -45,7 +64,7 @@ void draw(){
   
   //Shapes
   for(int i = 0; i < shapes.size(); i++){
-    abstractSearchObject shape = (abstractSearchObject)shapes.get(i);
+    shapeObject shape = (shapeObject)shapes.get(i);
     shape.display();
   }
 }
@@ -54,9 +73,10 @@ void mousePressed(){
   println("Mouse pressed");
   if(selectedShape == null){
     for(int i = 0; i < shapes.size(); i++){ 
-      abstractSearchObject shape = (abstractSearchObject)shapes.get(i);
+      shapeObject shape = (shapeObject)shapes.get(i);
         if (shape.isOver(mouseX, mouseY)){
         selectedShape = shape;
+        selectedShape.shapeColor = color(random(255), random(255), random(255));
         break;
       } else {
         selectedShape = null;
@@ -87,27 +107,30 @@ void keyPressed(){
   if (key == CODED){
     if(selectedShape != null){
        if (keyCode == UP){
-         selectedShape.dshapeY += 10;
-         println("grow " + selectedShape.type);
-         
+         if(selectedShape.shapeHeight < 200){
+           selectedShape.shapeHeight += 10;
+         }
        }
        if(keyCode == DOWN){
-         selectedShape.dshapeY -= 10;
-         println("shrink " + selectedShape.type);
+         if(selectedShape.shapeHeight > 10){
+           selectedShape.shapeHeight -= 10;
+         }
        }
        if(keyCode == RIGHT){
-         selectedShape.dshapeX += 10;
-         println("shrink " + selectedShape.type);
+         if(selectedShape.shapeWidth < 200){
+           selectedShape.shapeWidth += 10;
+         }
        }
        if(keyCode == LEFT){
-         selectedShape.dshapeX -= 10;
-         println("shrink " + selectedShape.type);
+         if(selectedShape.shapeWidth > 10){
+           selectedShape.shapeWidth -= 10;
+         }
        }
     }
   }
 }
 
-void evaluateShapeSelection(abstractSearchObject shape){ 
+/*void evaluateShapeSelection(shapeObject shape){ 
   if (shape.isOver(mouseX, mouseY) & selectedShape==null){
     selectedShape = shape;
     println("Selected: " + shape.type);
@@ -115,24 +138,24 @@ void evaluateShapeSelection(abstractSearchObject shape){
     dragY = (int)shape.shapeY - mouseY;
     selectedShape = shape;
   }
-}
+}*/
 
 //=====================================================================
-abstract class abstractSearchObject{
+abstract class shapeObject{
   String type;
   color shapeColor;
   float shapeX;
   float shapeY;
-  int dshapeX;
-  int dshapeY;
+  int shapeWidth;
+  int shapeHeight;
  
-  abstractSearchObject(String type, color tempColor, float tempX, float tempY,int tempdshapeX, int tempdshapeY) {
+  shapeObject(String type, color tempColor, float tempX, float tempY,int tempshapeWidth, int tempshapeHeight) {
      this.type = type;
      shapeColor = tempColor;
      shapeX = tempX;
      shapeY = tempY;
-     dshapeX = tempdshapeX;
-     dshapeY = tempdshapeY;
+     shapeWidth = tempshapeWidth;
+     shapeHeight = tempshapeHeight;
   }
  
   void display() {
@@ -140,21 +163,21 @@ abstract class abstractSearchObject{
     fill(shapeColor);
     if(this.type.equals("Rectangle")){
       rectMode(RADIUS);
-      rect(shapeX,shapeY,dshapeX,dshapeY);
+      rect(shapeX,shapeY, shapeWidth, shapeHeight);
     } else if(this.type.equals("Triangle")){
-        ellipse(shapeX,shapeY, 10, 55);
-    } else if(this.type.equals("Ellipse")){
-        ellipse(shapeX,shapeY, 10, 55);
-    } else {
-        ellipse(shapeX,shapeY, 55, 55);
+        triangle(shapeX, shapeY, shapeX + shapeWidth, shapeY, (shapeX + shapeX + shapeWidth)/2, shapeY + shapeHeight);
+    } else if(this.type.equals("Ellipse") || this.type.equals("Circle")){
+        ellipse(shapeX,shapeY, shapeWidth, shapeHeight);
+    } else if(this.type.equals("Arc")){
+        arc(shapeX,shapeY, shapeWidth, shapeHeight, PI, TWO_PI);
     }
   }
     
   
   //is mouse inside shape
   boolean isOver(int x, int y){
-    if((x > shapeX-dshapeX) & x < (shapeX+dshapeX)){
-      if((y > shapeY-dshapeY)  & y < (shapeY+dshapeY)){
+    if((x > shapeX-shapeWidth) & x < (shapeX+shapeWidth)){
+      if((y > shapeY-shapeHeight)  & y < (shapeY+shapeHeight)){
         return true;
       }
     }
@@ -169,10 +192,10 @@ abstract class abstractSearchObject{
 
 
 //=====================================================================
-class Shape extends abstractSearchObject{
+class Shape extends shapeObject{
   
-  Shape(String type, color tempshapeColor, float tempX, float tempY,int tempdshapeX, int tempdshapeY) {
-    super( type,  tempshapeColor,  tempX,  tempY, tempdshapeX,  tempdshapeY);
+  Shape(String type, color tempshapeColor, float tempX, float tempY,int tempshapeWidth, int tempshapeHeight) {
+    super( type,  tempshapeColor,  tempX,  tempY, tempshapeWidth,  tempshapeHeight);
   }
   
   void display(){
