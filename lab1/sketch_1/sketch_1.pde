@@ -2,7 +2,6 @@ import java.util.ArrayList;
  
 ArrayList shapes;
 abstractSearchObject selectedShape = null;
-abstractSearchObject ShapeBeingDragged;
 int dragX;
 int dragY;
 color c = color(random(255), random(255), random(255));
@@ -10,7 +9,7 @@ PFont font;
  
 void setup()
 {
-  ShapeBeingDragged = null;
+  selectedShape = null;
   shapes = new ArrayList();
   size(800, 500);//window size
   smooth();
@@ -18,18 +17,17 @@ void setup()
   
   //create shapes
   shapes.add(new Shape("Rectangle", color(random(255), random(255), random(255)),width/2.0+100, height/5.0+100, 100, 20));
-  shapes.add(new Shape("Triangle", color(random(255), random(255), random(255)),width+10, 4.0*height/5.0, 100, 20));
-  shapes.add(new Shape("Ellipse", color(random(255), random(255), random(255)),width+30, 2.0*height/5.0, 100, 20));
-  shapes.add(new Shape("Circle", color(random(255), random(255), random(255)),width/3, 1.0*height/5.0, 50, 20));
-  shapes.add(new Shape("Diamond", color(random(255), random(255), random(255)),width, 4.0*height, 10, 20)); 
+  shapes.add(new Shape("Triangle", color(random(255), random(255), random(255)),10,10, 100, 20));
+  shapes.add(new Shape("Ellipse", color(random(255), random(255), random(255)),20, 20, 100, 20));
+  shapes.add(new Shape("Circle", color(random(255), random(255), random(255)),50, 50, 50, 20));
+  shapes.add(new Shape("Diamond", color(random(255), random(255), random(255)),width, 4.0*height, 5, 5)); 
 }
 
  void changeColor(){
   this.c = color(0,0,255);
   }
  
-void draw()
-{
+void draw(){
   background(255);
   
   //Text
@@ -37,8 +35,8 @@ void draw()
   fill(0);//font color
   text("Mouse position: " + str(mouseX) + ", " + str(mouseY), 50, 50);
   
-  textFont(font, 20);//font style + size)
-  fill(0);//font color
+  textFont(font, 20);
+  fill(0);
   if(selectedShape == null){
     text("Selected: none", 400, 50);
   } else {
@@ -47,89 +45,116 @@ void draw()
   
   //Shapes
   for(int i = 0; i < shapes.size(); i++){
-// note how I no longer assume it is only Shape that is being drawn.
-    abstractSearchObject myShape1 = (abstractSearchObject)shapes.get(i);
-    myShape1.display();
+    abstractSearchObject shape = (abstractSearchObject)shapes.get(i);
+    shape.display();
   }
 }
  
 void mousePressed(){
-    println("Mouse pressed");
-  for(int i = 0; i < shapes.size(); i++){ 
-    abstractSearchObject myShape1 = (abstractSearchObject)shapes.get(i);
-    evaluateShapeSelection(myShape1);
-    myShape1.qc = color(random(255), random(255), random(255));
+  println("Mouse pressed");
+  if(selectedShape == null){
+    for(int i = 0; i < shapes.size(); i++){ 
+      abstractSearchObject shape = (abstractSearchObject)shapes.get(i);
+        if (shape.isOver(mouseX, mouseY)){
+        selectedShape = shape;
+        break;
+      } else {
+        selectedShape = null;
+      }
+    }
+  } else {
+    //shape already selected and will be moved to clicked position
+     selectedShape.moveByMouseCoord(mouseX, mouseY);
+     selectedShape.shapeColor = color(random(255), random(255), random(255));
+     selectedShape = null;
   }
 }
 
-void mouseReleased(){
-  ShapeBeingDragged = null; 
+/*void mouseReleased(){
+  selectedShape.shapeColor = color(random(255), random(255), random(255));
 } 
  
 void mouseDragged(){
-  if( ShapeBeingDragged != null){
-     println("dragging" + ShapeBeingDragged.type);
-    //moveShapeByMouse(ShapeBeingDragged);
-    // note how I encapsulated the movement from directly affecting qx and qy
-    ShapeBeingDragged.moveByMouseCoord(mouseX, mouseY);
+  if( selectedShape != null){
+     println("dragging " + selectedShape.type);
+    //moveShapeByMouse(selectedShape);
+    // note how I encapsulated the movement from directly affecting shapeX and shapeY
+    selectedShape.moveByMouseCoord(mouseX, mouseY);
    }
-}
+}*/
 
 void keyPressed(){
   if (key == CODED){
     if(selectedShape != null){
        if (keyCode == UP){
+         selectedShape.dshapeY += 10;
          println("grow " + selectedShape.type);
+         
        }
        if(keyCode == DOWN){
+         selectedShape.dshapeY -= 10;
+         println("shrink " + selectedShape.type);
+       }
+       if(keyCode == RIGHT){
+         selectedShape.dshapeX += 10;
+         println("shrink " + selectedShape.type);
+       }
+       if(keyCode == LEFT){
+         selectedShape.dshapeX -= 10;
          println("shrink " + selectedShape.type);
        }
     }
   }
 }
 
-
-//=====================================================================
-void evaluateShapeSelection(abstractSearchObject myShape1){ 
-  if (myShape1.isOver(mouseX, mouseY) & ShapeBeingDragged==null){
-    selectedShape = myShape1;
-    println("Selected: " + myShape1.type);
-    dragX = (int)myShape1.qx - mouseX;
-    dragY = (int)myShape1.qy - mouseY;
-    ShapeBeingDragged = myShape1;
+void evaluateShapeSelection(abstractSearchObject shape){ 
+  if (shape.isOver(mouseX, mouseY) & selectedShape==null){
+    selectedShape = shape;
+    println("Selected: " + shape.type);
+    dragX = (int)shape.shapeX - mouseX;
+    dragY = (int)shape.shapeY - mouseY;
+    selectedShape = shape;
   }
 }
 
-// This is how to use inheritance.  Use interface instead if you want even more flexibility.
+//=====================================================================
 abstract class abstractSearchObject{
   String type;
-  
-  color qc;
-  float qx;
-  float qy;
-  int dQx;
-  int dQy;
+  color shapeColor;
+  float shapeX;
+  float shapeY;
+  int dshapeX;
+  int dshapeY;
  
-  abstractSearchObject(String type, color tempQc, float tempX, float tempY,int tempdQx, int tempdQy) {
-    this.type = type;
-     qc = tempQc;
-     qx = tempX;
-     qy = tempY;
-     dQx = tempdQx;
-     dQy = tempdQy;
+  abstractSearchObject(String type, color tempColor, float tempX, float tempY,int tempdshapeX, int tempdshapeY) {
+     this.type = type;
+     shapeColor = tempColor;
+     shapeX = tempX;
+     shapeY = tempY;
+     dshapeX = tempdshapeX;
+     dshapeY = tempdshapeY;
   }
  
   void display() {
     stroke(0);
-    fill(qc);
-    rectMode(RADIUS);
-    rect(qx,qy,dQx,dQy);
+    fill(shapeColor);
+    if(this.type.equals("Rectangle")){
+      rectMode(RADIUS);
+      rect(shapeX,shapeY,dshapeX,dshapeY);
+    } else if(this.type.equals("Triangle")){
+        ellipse(shapeX,shapeY, 10, 55);
+    } else if(this.type.equals("Ellipse")){
+        ellipse(shapeX,shapeY, 10, 55);
+    } else {
+        ellipse(shapeX,shapeY, 55, 55);
+    }
   }
+    
   
   //is mouse inside shape
   boolean isOver(int x, int y){
-    if((x > qx-dQx) & x < (qx+dQx)){
-      if((y > qy-dQy)  & y < (qy+dQy)){
+    if((x > shapeX-dshapeX) & x < (shapeX+dshapeX)){
+      if((y > shapeY-dshapeY)  & y < (shapeY+dshapeY)){
         return true;
       }
     }
@@ -137,8 +162,8 @@ abstract class abstractSearchObject{
   }
   
   void moveByMouseCoord(int mausX, int mausY){
-    this.qx = mausX + dragX;
-    this.qy = mausY + dragY;
+    this.shapeX = mausX + dragX;
+    this.shapeY = mausY + dragY;
   }
 }
 
@@ -146,13 +171,11 @@ abstract class abstractSearchObject{
 //=====================================================================
 class Shape extends abstractSearchObject{
   
-  Shape(String type, color tempQc, float tempX, float tempY,int tempdQx, int tempdQy) {
-// by convention, you cannot inherit the constructor.
-    super( type,  tempQc,  tempX,  tempY, tempdQx,  tempdQy);
+  Shape(String type, color tempshapeColor, float tempX, float tempY,int tempdshapeX, int tempdshapeY) {
+    super( type,  tempshapeColor,  tempX,  tempY, tempdshapeX,  tempdshapeY);
   }
   
   void display(){
-//super is the keyword to refer to the parent class.
      super.display();
   } 
 }
