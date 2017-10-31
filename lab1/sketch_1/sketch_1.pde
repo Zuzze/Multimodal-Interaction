@@ -17,11 +17,11 @@ void setup()
   font = loadFont("AmericanTypewriter-48.vlw");
   
   //create shapes
-  shapes.add(new Shape("Rectangle", color(0), 600, 300, 25, 25));
-  shapes.add(new Shape("Triangle", color(0), 200, 100, 20, 20));
-  shapes.add(new Shape("Ellipse", color(0), 500, 100, 50, 20));
-  shapes.add(new Shape("Circle", color(0),200, 200, 50, 50));
-  shapes.add(new Shape("Arc", color(0),80, 200, 150, 100)); 
+  shapes.add(new shapeObject("Rectangle", color(0), 600, 300, 25, 25));
+  shapes.add(new shapeObject("Triangle", color(0), 200, 100, 20, 20));
+  shapes.add(new shapeObject("Ellipse", color(0), 500, 100, 50, 20));
+  shapes.add(new shapeObject("Circle", color(0),200, 200, 50, 50));
+  shapes.add(new shapeObject("Arc", color(0),80, 200, 150, 100)); 
 }
  
  void setGradient(int x, int y, float w, float h, color c1, color c2, int axis ) {
@@ -85,7 +85,7 @@ void mousePressed(){
   } else {
     //shape already selected and will be moved to clicked position
      selectedShape.moveByMouseCoord(mouseX, mouseY);
-     selectedShape.shapeColor = color(random(255), random(255), random(255));
+     selectedShape.shapeColor = color(0);
      selectedShape = null;
   }
 }
@@ -141,7 +141,7 @@ void keyPressed(){
 }*/
 
 //=====================================================================
-abstract class shapeObject{
+class shapeObject{
   String type;
   color shapeColor;
   float shapeX;
@@ -188,17 +188,4 @@ abstract class shapeObject{
     this.shapeX = mausX + dragX;
     this.shapeY = mausY + dragY;
   }
-}
-
-
-//=====================================================================
-class Shape extends shapeObject{
-  
-  Shape(String type, color tempshapeColor, float tempX, float tempY,int tempshapeWidth, int tempshapeHeight) {
-    super( type,  tempshapeColor,  tempX,  tempY, tempshapeWidth,  tempshapeHeight);
-  }
-  
-  void display(){
-     super.display();
-  } 
 }
