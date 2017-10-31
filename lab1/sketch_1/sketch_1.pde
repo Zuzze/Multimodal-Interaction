@@ -1,8 +1,8 @@
 import java.util.ArrayList;
 ArrayList shapes;
 shapeObject selectedShape = null;
-int dragX;
-int dragY;
+int posX;
+int posY;
 int Y_AXIS = 1;
 int X_AXIS = 2;
 PFont font;
@@ -17,11 +17,11 @@ void setup()
   font = loadFont("AmericanTypewriter-48.vlw");
   
   //create shapes
-  shapes.add(new shapeObject("Rectangle", color(0), 600, 300, 25, 25));
-  shapes.add(new shapeObject("Triangle", color(0), 200, 100, 20, 20));
-  shapes.add(new shapeObject("Ellipse", color(0), 500, 100, 50, 20));
-  shapes.add(new shapeObject("Circle", color(0),200, 200, 50, 50));
-  shapes.add(new shapeObject("Arc", color(0),80, 200, 150, 100)); 
+  shapes.add(new shapeObject("Rectangle", color(0), 400, 260, 50, 10));
+  shapes.add(new shapeObject("Triangle", color(0), 385, 270, 30, 30));
+  shapes.add(new shapeObject("Ellipse", color(0), 400, 200, 100, 100));
+  shapes.add(new shapeObject("Diamond", color(0),400, 300, 50, 100));
+  shapes.add(new shapeObject("Arc", color(0),400, 450, 150, 100)); 
 }
  
  void setGradient(int x, int y, float w, float h, color c1, color c2, int axis ) {
@@ -130,16 +130,6 @@ void keyPressed(){
   }
 }
 
-/*void evaluateShapeSelection(shapeObject shape){ 
-  if (shape.isOver(mouseX, mouseY) & selectedShape==null){
-    selectedShape = shape;
-    println("Selected: " + shape.type);
-    dragX = (int)shape.shapeX - mouseX;
-    dragY = (int)shape.shapeY - mouseY;
-    selectedShape = shape;
-  }
-}*/
-
 //=====================================================================
 class shapeObject{
   String type;
@@ -170,6 +160,8 @@ class shapeObject{
         ellipse(shapeX,shapeY, shapeWidth, shapeHeight);
     } else if(this.type.equals("Arc")){
         arc(shapeX,shapeY, shapeWidth, shapeHeight, PI, TWO_PI);
+    } else if(this.type.equals("Diamond")){
+        quad(shapeX, shapeY, shapeX+shapeWidth/2, shapeY+shapeHeight/2, shapeX, shapeY + shapeHeight, shapeX-shapeWidth/2, shapeY + shapeHeight/2 );
     }
   }
     
@@ -185,7 +177,7 @@ class shapeObject{
   }
   
   void moveByMouseCoord(int mausX, int mausY){
-    this.shapeX = mausX + dragX;
-    this.shapeY = mausY + dragY;
+    this.shapeX = mausX + posX;
+    this.shapeY = mausY + posY;
   }
 }
